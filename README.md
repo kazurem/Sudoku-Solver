@@ -36,7 +36,7 @@ python -m venv ./path-to-venv
 source ./path-to-venv/bin/activate
 ```
 If the above command failed for you, you can probably use these to solve your problem:  
-1. [Stack Overflow: Activating Python Virtual Environments]("https://stackoverflow.com/questions/14604699/how-can-i-activate-a-virtualenv-in-linux")
+1. [Stack Overflow: Activating Python Virtual Environments](https://stackoverflow.com/questions/14604699/how-can-i-activate-a-virtualenv-in-linux)
 2. [Python Documentation: Virtual Environments](https://docs.python.org/3/library/venv.html)
   
 ### **4. Using requirements.txt:** 
