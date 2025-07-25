@@ -33,7 +33,7 @@ python -m venv ./path-to-venv
 #### **In Linux/Mac:**
   
 ```bash
-source .\path-to-venv\bin\activate
+source ./path-to-venv/bin/activate
 ```
 If the above command failed for you, you can probably use these to solve your problem:  
 1. [Stack Overflow: Activating Python Virtual Environments]("https://stackoverflow.com/questions/14604699/how-can-i-activate-a-virtualenv-in-linux")
