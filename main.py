@@ -17,11 +17,65 @@ class SudokuState:
     time_delay: float
     clear_screen: int
     no_of_newlines: int
+    
+
+class SudokuVisualizer:
+
+    def __init__(self, time_delay: int = 0):
+        self.time_delay = time_delay
+
+    def print(self, state):
+        # BOARD_SIZE * PUZZLE_HORIZONTOL_SPACE is for every number
+        # BOARD_SIZE//BOX_WIDTH is the number of |'s in the puzzle. Multiply it with PUZZLE_HORIZONTOL_SPACE to get the full space
+        # + 1 for the last |
+        if state.clear_screen:
+            os.system("cls" if os.name == "nt" else "clear")
+
+        horizontol_line_length: int = (
+            (state.board_size * state.horizontal_spacing)
+            + ((state.board_size // state.box_size) * state.horizontal_spacing)
+            + 1
+        )
+
+        for y in range(state.board_size):
+            if y % state.box_size == 0:  # put horizontol line at top
+                print("-" * horizontol_line_length)
+
+            for x in range(state.board_size):
+                if x % state.box_size == 0:  # put | every BOX_WIDTH
+                    print(f"{'|':<{state.horizontal_spacing}}", end="")
+
+                # Print the numbers (if original board is given then solution numbers are colored differently)
+                value: int = board[y][x]
+                if value == 0:
+                    print(f"{Fore.YELLOW}{'-':<{state.horizontal_spacing}}", end="")
+                elif state.original_board and value != state.original_board[y][x]:
+                    print(
+                        f"{Fore.GREEN}{value:<{state.horizontal_spacing}}",
+                        end="",
+                    )
+                else:  # given numbers
+                    print(f"{value:<{state.horizontal_spacing}}", end="")
+
+
+                if x == state.board_size - 1:  # put | at the right edge
+                    print("|", end="\n" * state.vertical_spacing)
+
+            if y == state.board_size - 1:  # put a horizontol line at bottom
+                print("-" * horizontol_line_length)
+
+        print("\n" * state.no_of_newlines, end="")
+
+        if self.time_delay > 0:
+            time.sleep(self.time_delay)
+
+
 
 class SudokuSolver:
     def __init__(
         self,
-        board: list[list[int]] | None = None,
+        board: list[list[int]],
+        visualizer: SudokuVisualizer,
         show_process: bool = False,
         horizontal_spacing: int = 2,
         vertical_spacing: int = 1,
@@ -34,6 +88,7 @@ class SudokuSolver:
         original_board: list[list[int]] = copy.deepcopy(board)
         board_size: int = len(board)
         box_size: int = int(board_size ** (1 / 2))
+        self.visualizer: SudokuVisualizer = visualizer
         self.state: SudokuState = SudokuState(
             board,
             original_board,
@@ -122,7 +177,7 @@ class SudokuSolver:
     ) -> bool:
         
         if self.show_process:
-            printBoard(
+            self.visualizer.print(
                 self.state
             )
 
@@ -141,52 +196,6 @@ class SudokuSolver:
                 self.state.board[row][column] = 0
         return False
 
-def printBoard(
-    state: SudokuState
-) -> None:
-
-    # BOARD_SIZE * PUZZLE_HORIZONTOL_SPACE is for every number
-    # BOARD_SIZE//BOX_WIDTH is the number of |'s in the puzzle. Multiply it with PUZZLE_HORIZONTOL_SPACE to get the full space
-    # + 1 for the last |
-    if state.clear_screen:
-        os.system("cls" if os.name == "nt" else "clear")
-
-    horizontol_line_length: int = (
-        (state.board_size * state.horizontal_spacing)
-        + ((state.board_size // state.box_size) * state.horizontal_spacing)
-        + 1
-    )
-
-    for y in range(state.board_size):
-        if y % state.box_size == 0:  # put horizontol line at top
-            print("-" * horizontol_line_length)
-
-        for x in range(state.board_size):
-            if x % state.box_size == 0:  # put | every BOX_WIDTH
-                print(f"{'|':<{state.horizontal_spacing}}", end="")
-
-            # Print the numbers (if original board is given then solution numbers are colored differently)
-            value: int = board[y][x]
-            if value == 0:
-                print(f"{Fore.YELLOW}{'-':<{state.horizontal_spacing}}", end="")
-            elif state.original_board and value != state.original_board[y][x]:
-                print(
-                    f"{Fore.GREEN}{value:<{state.horizontal_spacing}}",
-                    end="",
-                )
-            else:  # given numbers
-                print(f"{value:<{state.horizontal_spacing}}", end="")
-
-
-            if x == state.board_size - 1:  # put | at the right edge
-                print("|", end="\n" * state.vertical_spacing)
-
-        if y == state.board_size - 1:  # put a horizontol line at bottom
-            print("-" * horizontol_line_length)
-
-    print("\n" * state.no_of_newlines, end="")
-    time.sleep(state.time_delay)
-
 
 
 board: list[list[int]] = [
@@ -203,10 +212,11 @@ board: list[list[int]] = [
 
 
 def main() -> None:
-    solver: SudokuSolver = SudokuSolver(board, show_process=True, clear_screen=True, time_delay=0.2, no_of_newlines=1)
+    visualizer: SudokuVisualizer = SudokuVisualizer(time_delay=0.1)
+    solver: SudokuSolver = SudokuSolver(board, visualizer, show_process=False, clear_screen=False, no_of_newlines=1)
 
     print("Puzzle: ")
-    printBoard(solver.state)
+    visualizer.print(solver.state)
     print()
 
     start: float = time.time()
@@ -215,7 +225,7 @@ def main() -> None:
 
     if solved:
         print("Solution: ")
-        printBoard(solver.state)
+        visualizer.print(solver.state)
     else:
         print("No solution exists!")
 
