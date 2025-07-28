@@ -80,7 +80,7 @@ class SudokuSolver:
     def __init__(
         self,
         board: list[list[int]],
-        visualizer: SudokuVisualizer,
+        visualizer: SudokuVisualizer | None = None,
         show_process: bool = False,
         horizontal_spacing: int = 2,
         vertical_spacing: int = 1,
@@ -108,10 +108,6 @@ class SudokuSolver:
         self.algorithm: str = algorithm
         self.show_process: bool = show_process
 
-        if self.isValidBoard():
-            print("Board isn't valid!")
-
-
     def isValidBoard(self) -> None:
 
         # check if box size is valid (Box size is equal to board size)
@@ -134,7 +130,7 @@ class SudokuSolver:
                 self.state.board[y][x] = 0
 
     def isMoveValid(self, position: tuple[int, int], number: int) -> bool:
-        if number > self.state.board_size:
+        if number > self.state.board_size or number < 1:
             return False
         
         pos_x: int = position[1]
@@ -217,7 +213,7 @@ board: list[list[int]] = [
 
 
 def main() -> None:
-    visualizer: SudokuVisualizer = SudokuVisualizer(time_delay=0.2)
+    visualizer: SudokuVisualizer = SudokuVisualizer(time_delay=0)
     solver: SudokuSolver = SudokuSolver(board, visualizer, show_process=True, clear_screen=False, no_of_newlines=1)
 
     print("Puzzle: ")
