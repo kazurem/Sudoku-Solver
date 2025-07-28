@@ -1,5 +1,5 @@
 import pytest
-from src.main import SudokuSolver
+from src.sudoku_solver import SudokuSolver
 
 # ---------------------------
 # Tests for isValidBoard
