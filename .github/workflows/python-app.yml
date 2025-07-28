@@ -21,8 +21,6 @@ jobs:
         shell: bash
     steps:
     - uses: actions/checkout@v4
-    - name: Set PowerShell ExecutionPolicy
-      run: powershell -Command "Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process"
     - name: Set up Python 3.13
       uses: actions/setup-python@v5
       with:
