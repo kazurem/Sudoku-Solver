@@ -1,6 +1,9 @@
 from dataclasses import dataclass
 import copy
-from src.sudoku_visualizer import SudokuVisualizer
+try:
+	from src.sudoku_visualizer import SudokuVisualizer
+except ModuleNotFoundError:
+    from sudoku_visualizer import SudokuVisualizer
 
 @dataclass
 class SudokuState:

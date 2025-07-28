@@ -1,5 +1,11 @@
-from src.sudoku_solver import SudokuSolver
-from src.sudoku_visualizer import SudokuVisualizer
+try:
+    from src.sudoku_visualizer import SudokuVisualizer
+    from src.sudoku_solver import SudokuSolver
+except ModuleNotFoundError:
+    # Fallback if running main.py directly
+    from sudoku_visualizer import SudokuVisualizer
+    from sudoku_solver import SudokuSolver
+
 import time
 
 board: list[list[int]] = [
@@ -16,7 +22,7 @@ board: list[list[int]] = [
 
 
 def main() -> None:
-    visualizer: SudokuVisualizer = SudokuVisualizer(time_delay=0.2)
+    visualizer: SudokuVisualizer = SudokuVisualizer(time_delay=0.01)
     solver: SudokuSolver = SudokuSolver(board, visualizer, show_process=True, clear_screen=False, no_of_newlines=1)
 
     print("Puzzle: ")
