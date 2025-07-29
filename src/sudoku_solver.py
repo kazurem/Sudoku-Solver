@@ -1,9 +1,9 @@
 from dataclasses import dataclass
 import copy
 try:
-	from src.sudoku_visualizer import SudokuVisualizer
+	from src.sudoku_visualizer import SudokuObserver
 except ModuleNotFoundError:
-    from sudoku_visualizer import SudokuVisualizer
+    from sudoku_visualizer import SudokuObserver
 
 @dataclass
 class SudokuState:
@@ -21,7 +21,7 @@ class SudokuSolver:
     def __init__(
         self,
         board: list[list[int]],
-        visualizer: SudokuVisualizer | None = None,
+        visualizer: SudokuObserver | None = None,
         show_process: bool = False,
         horizontal_spacing: int = 2,
         vertical_spacing: int = 1,
@@ -34,7 +34,7 @@ class SudokuSolver:
         original_board: list[list[int]] = copy.deepcopy(board)
         board_size: int = len(board)
         box_size: int = int(board_size ** (1 / 2))
-        self.visualizer: SudokuVisualizer = visualizer
+        self.visualizer: SudokuObserver = visualizer
         self.state: SudokuState = SudokuState(
             board,
             original_board,
