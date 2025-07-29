@@ -1,8 +1,8 @@
 # tests/conftest.py
 import pytest
-from src.sudoku_solver import SudokuSolver
-
 pytest.importorskip("PySide6")
+
+from src.sudoku_solver import SudokuSolver
 
 @pytest.fixture
 def valid_board() -> list[list[int]]:
