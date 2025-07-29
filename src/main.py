@@ -1,9 +1,9 @@
 try:
-    from src.sudoku_visualizer import SudokuVisualizer
+    from src.sudoku_visualizer import SudokuGUIVisualizer, SudokuTerminalVisualizer
     from src.sudoku_solver import SudokuSolver
 except ModuleNotFoundError:
     # Fallback if running main.py directly
-    from sudoku_visualizer import SudokuVisualizer
+    from sudoku_visualizer import SudokuGUIVisualizer, SudokuTerminalVisualizer
     from sudoku_solver import SudokuSolver
 
 import time
@@ -22,24 +22,24 @@ board: list[list[int]] = [
 
 
 def main() -> None:
-    visualizer: SudokuVisualizer = SudokuVisualizer(time_delay=0.01)
+    visualizer: SudokuGUIVisualizer = SudokuTerminalVisualizer()
     solver: SudokuSolver = SudokuSolver(board, visualizer, show_process=True, clear_screen=False, no_of_newlines=1)
+    solver.solve()
+    # print("Puzzle: ")
+    # visualizer.print(solver.state)
+    # print()
 
-    print("Puzzle: ")
-    visualizer.print(solver.state)
-    print()
+    # start: float = time.time()
+    # solved: bool = solver.solve()
+    # end: float = time.time()
 
-    start: float = time.time()
-    solved: bool = solver.solve()
-    end: float = time.time()
+    # if solved:
+    #     print("Solution: ")
+    #     visualizer.print(solver.state)
+    # else:
+    #     print("No solution exists!")
 
-    if solved:
-        print("Solution: ")
-        visualizer.print(solver.state)
-    else:
-        print("No solution exists!")
-
-    print("Time taken: ", end - start, " seconds")
+    # print("Time taken: ", end - start, " seconds")
 
 
 if __name__ == "__main__":
