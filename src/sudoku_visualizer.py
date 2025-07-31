@@ -3,7 +3,7 @@ import sys
 import time
 
 from PySide6.QtWidgets import QMainWindow, QApplication, QWidget, QTableWidget, QPushButton, QLineEdit, QComboBox, QHBoxLayout, QVBoxLayout, QGroupBox, QLabel, QHeaderView, QTableWidgetItem, QStyledItemDelegate
-from PySide6.QtCore import Qt, QRect, QTimer
+from PySide6.QtCore import Qt, QRect, QTimer, QObject
 from PySide6.QtGui import QPen, QColor
 
 
@@ -13,6 +13,7 @@ class ANSIColors:
     WHITE_BOLD:  ClassVar[str]  = "\033[1;37m"
     END:         ClassVar[str]  = "\033[0m"
     
+#Go into detail on how this works 
 class SudokuDelegate(QStyledItemDelegate):
     def paint(self, painter, option, index):
         # Draw the default cell content
@@ -57,9 +58,9 @@ class SudokuObserver:
     def renderUI(self):
         pass
 
-
-class SudokuTerminalVisualizer(SudokuObserver):
+class SudokuTerminalVisualizer(QObject):
     def __init__(self, time_delay: int = 0):
+        super().__init__()
         print("\033[2J\033[H")
         self.time_delay = time_delay
 
@@ -107,19 +108,22 @@ class SudokuTerminalVisualizer(SudokuObserver):
 
 
 class SudokuGUIVisualizer(QMainWindow, SudokuObserver):
-    def __init__(self, window_geometry: QRect = QRect(500, 200, 1200, 800)):
+    
+    def __init__(self, table_dimensions: int, window_geometry: QRect = QRect(400, 100, 800, 500)):
         super().__init__()
+        self.table_dimensions = table_dimensions
         self.window_geometry: QRect = window_geometry
         self.initUI()
 
-    def __new__(cls, window_geometry: QRect= QRect(500, 200, 1200, 800)):
+    def __new__(cls,  table_dimensions: int, window_geometry: QRect= QRect(500, 200, 1200, 800)):
         if not hasattr(cls, "instance"):
-            cls.instance: SudokuGUIVisualizer = super(SudokuGUIVisualizer, cls).__new__(cls, window_geometry)
+            cls.instance: SudokuGUIVisualizer = super(SudokuGUIVisualizer, cls).__new__(cls, window_geometry, table_dimensions)
         return cls.instance
     
     def initUI(self):
         self.setGeometry(self.window_geometry)
         self.setMinimumWidth(750)
+        self.setMinimumHeight(500)
         #Central Widget
         self.central_widget: QWidget = QWidget(self)
         self.horizotal_layout: QHBoxLayout = QHBoxLayout()
@@ -213,10 +217,11 @@ class SudokuGUIVisualizer(QMainWindow, SudokuObserver):
         self.board.setItemDelegate(SudokuDelegate(self.board))
         self.board.setSelectionMode(QTableWidget.NoSelection)
 
-        for y in range(9):
-            for x in range(9):
+        for y in range(self.table_dimensions):
+            for x in range(self.table_dimensions):
                 self.board.setItem(y, x, QTableWidgetItem())
                 self.board.item(y, x).setTextAlignment(Qt.AlignCenter)
+
         self.sidebar_widgets: list[QWidget] = []
         #Load example button
         self.load_example: QPushButton = QPushButton("Load Example Puzzle")
@@ -234,12 +239,12 @@ class SudokuGUIVisualizer(QMainWindow, SudokuObserver):
         self.sidebar_widgets.append(self.solve_mode_combo_box)
 
         #Time Delay line edit
-        self.time_delay: QLineEdit = QLineEdit()
-        self.time_delay.setText("0")
-        self.sidebar_widgets.append(self.time_delay)
+        self.time_delay_lineedit: QLineEdit = QLineEdit()
+        self.time_delay_lineedit.setText("")
+        self.sidebar_widgets.append(self.time_delay_lineedit)
 
         if self.solve_mode_combo_box.currentText() == "Fast":
-            self.time_delay.setDisabled(True)
+            self.time_delay_lineedit.setDisabled(True)
 
         #Solve button
         self.solve_button: QPushButton = QPushButton("Solve Puzzle")
@@ -271,5 +276,20 @@ class SudokuGUIVisualizer(QMainWindow, SudokuObserver):
             self.vertical_layout.addWidget(widget)
             self.vertical_layout.addStretch(8)
         
+    def disableCellEditing(self, value: bool):    
+        for row in range(self.board.rowCount()):
+            for column in range(self.board.columnCount()):
+                item = self.board.item(row, column)
+                if item:
+                    if value:
+                        item.setFlags(item.flags() & ~Qt.ItemIsEditable)
+                    else:
+                        item.setFlags(item.flags() | Qt.ItemIsEditable)
 
-    
+    def setTableFocus(self, value: bool):
+        if value is False:
+            self.board.clearSelection()
+            self.board.setCurrentCell(-1, -1)
+            self.board.clearFocus() 
+        else:
+            self.board.setFocus() 
