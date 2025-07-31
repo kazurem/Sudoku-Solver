@@ -56,6 +56,8 @@ class SudokuSolver(QObject):
         self.algorithm: str = algorithm
         self.show_process: bool = show_process
 
+        self._backtrack_stack = []
+
     def isValidBoard(self) -> None:
 
         # check if box size is valid (Box size is equal to board size)
@@ -118,31 +120,34 @@ class SudokuSolver(QObject):
         return None
     
     def solve(self):
-        solved = self._backTrackSolve()
-        return solved
+        empty_cell = self.findEmpty()
+        self._backtrack_stack.append((empty_cell[0], empty_cell[1], 1))
 
-    def _backTrackSolve(
-        self
-    ) -> bool:
+        while True:
+            if not self._backTrackStep():
+                break
+
+    def _backTrackStep(self):       
+        if len(self._backtrack_stack) == 0:
+            return False
         
-        if self.show_process:
-            self.visualizer.print(
-                self.state
-            )
+        row, column, number = self._backtrack_stack.pop()
 
-        empty_pos: tuple[int, int] | None = self.findEmpty()
-        if empty_pos is None:
-            return True
+        if self.isMoveValid((row, column), number):
+            self.state.board[row][column] = number
+            self.value_changed.emit(row, column, number)
+
+            self._backtrack_stack.append((row, column, number + 1))
+
+            new_cell = self.findEmpty()
+            if new_cell is None:
+                return False
+            self._backtrack_stack.append((new_cell[0], new_cell[1], 1))
         else:
-            row, column = empty_pos
-        for i in range(1, self.state.board_size + 1):
-            if self.isMoveValid(empty_pos, i):
-                self.state.board[row][column] = i
-                self.value_changed.emit(row, column, i)
-
-                if self._backTrackSolve():
-                    return True
-
+            if number < self.state.board_size:
+                self._backtrack_stack.append((row, column, number + 1))
+            else:
                 self.state.board[row][column] = 0
                 self.value_changed.emit(row, column, 0)
-        return False
+
+        return True
