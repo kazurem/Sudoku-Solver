@@ -1,7 +1,7 @@
 import copy
 from dataclasses import dataclass
 
-from PySide6.QtCore import Signal, QObject
+from PySide6.QtCore import Signal, QObject, QThread
 
 try:
 	from src.sudoku_visualizer import SudokuObserver
@@ -57,6 +57,9 @@ class SudokuSolver(QObject):
         self.show_process: bool = show_process
 
         self._backtrack_stack = []
+
+    def setSolverThread(self, thread: QThread):
+        self.solver_thread = thread
 
     def isValidBoard(self) -> None:
 
@@ -126,6 +129,8 @@ class SudokuSolver(QObject):
         while True:
             if not self._backTrackStep():
                 break
+
+        self.moveToThread(self.solver_thread)
 
     def _backTrackStep(self):       
         if len(self._backtrack_stack) == 0:

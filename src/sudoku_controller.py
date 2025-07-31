@@ -13,7 +13,8 @@ class SudokuController:
 
     #this functions will be connected to the solve button
     def startSolving(self):
-        self.solver.solve()
+        self._setupThread()
+        self.solver_thread.start()
     
     def setupUI(self):
         self.app: QApplication = QApplication(sys.argv)
@@ -25,9 +26,15 @@ class SudokuController:
         self.view.show()
         sys.exit(self.app.exec())
 
+    #setup the thread, connections and moves the solver to that thread
     def _setupThread(self):
-        pass
-        #setup the thread, connections and moves the solver to that thread
+        self.solver_thread: QThread = QThread()
+
+        self._setupConnections()
+        self.solver_thread.started.connect(self.solver.solve)
+
+        self.solver.setSolverThread(self.solver_thread)
+        self.solver.moveToThread(self.solver_thread)
 
     #connect the GUI to the various backend functions
     def _setupConnections(self):
@@ -55,5 +62,8 @@ class SudokuController:
 
     def quit(self):
         self.view.close()
+        if hasattr(self, "solver_thread"):
+            self.solver_thread.quit()
+            self.solver_thread.wait()
     
 
