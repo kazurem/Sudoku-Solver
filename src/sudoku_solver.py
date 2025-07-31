@@ -1,9 +1,13 @@
-from dataclasses import dataclass
 import copy
+from dataclasses import dataclass
+
+from PySide6.QtCore import Signal, QObject
+
 try:
 	from src.sudoku_visualizer import SudokuObserver
 except ModuleNotFoundError:
     from sudoku_visualizer import SudokuObserver
+
 
 @dataclass
 class SudokuState:
@@ -17,11 +21,13 @@ class SudokuState:
     clear_screen: int
     no_of_newlines: int
 
-class SudokuSolver:
+class SudokuSolver(QObject):
+    #signal for when a board value gets changed
+    value_changed: Signal = Signal(int, int, int) #row, column, value
+
     def __init__(
         self,
         board: list[list[int]],
-        visualizer: SudokuObserver | None = None,
         show_process: bool = False,
         horizontal_spacing: int = 2,
         vertical_spacing: int = 1,
@@ -30,11 +36,12 @@ class SudokuSolver:
         no_of_newlines: int = 2,
         algorithm: str = "backtrack",
     ) -> None:
+        
+        super().__init__()
 
         original_board: list[list[int]] = copy.deepcopy(board)
         board_size: int = len(board)
         box_size: int = int(board_size ** (1 / 2))
-        self.visualizer: SudokuObserver = visualizer
         self.state: SudokuState = SudokuState(
             board,
             original_board,
@@ -131,9 +138,11 @@ class SudokuSolver:
         for i in range(1, self.state.board_size + 1):
             if self.isMoveValid(empty_pos, i):
                 self.state.board[row][column] = i
+                self.value_changed.emit(row, column, i)
 
                 if self._backTrackSolve():
                     return True
 
                 self.state.board[row][column] = 0
+                self.value_changed.emit(row, column, 0)
         return False

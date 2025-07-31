@@ -107,12 +107,12 @@ class SudokuTerminalVisualizer(SudokuObserver):
 
 
 class SudokuGUIVisualizer(QMainWindow, SudokuObserver):
-    def __init__(self, window_geometry: QRect = QRect(500, 200, 1200, 800)):
+    def __init__(self, window_geometry: QRect = QRect(400, 150, 800, 500)):
         super().__init__()
         self.window_geometry: QRect = window_geometry
         self.initUI()
 
-    def __new__(cls, window_geometry: QRect= QRect(500, 200, 1200, 800)):
+    def __new__(cls, window_geometry: QRect= QRect(400, 150, 800, 500)):
         if not hasattr(cls, "instance"):
             cls.instance: SudokuGUIVisualizer = super(SudokuGUIVisualizer, cls).__new__(cls, window_geometry)
         return cls.instance
