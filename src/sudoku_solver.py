@@ -83,6 +83,7 @@ class SudokuSolver(QObject):
         for y in range(self.state.board_size):
             for x in range(self.state.board_size):
                 self.state.board[y][x] = 0
+                self.value_changed.emit(y, x, 0)
 
     def isMoveValid(self, position: tuple[int, int], number: int) -> bool:
         if number > self.state.board_size or number < 1:

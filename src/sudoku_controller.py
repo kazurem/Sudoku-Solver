@@ -39,6 +39,7 @@ class SudokuController():
         self.view.quit_button.clicked.connect(self.quitApplication)
         self.view.solve_mode_combo_box.currentTextChanged.connect(self.solveModeChanged)
         self.view.time_delay.returnPressed.connect(self.timeDelayChanged)
+        self.view.clear_button.clicked.connect(self.clearBoardButtonClicked)
 
         self.solver.finished.connect(self.stopButtonClicked)
         self.view.stop_button.clicked.connect(self.stopButtonClicked)
@@ -47,6 +48,8 @@ class SudokuController():
         self.view.stop_button.clicked.connect(lambda: self.view.toggleEverySidebarWidgetExcept("enable", exceptions=[self.view.stop_button]))
         self.solver.finished.connect(lambda: self.view.toggleEverySidebarWidgetExcept("enable", exceptions=[self.view.solve_button]))
 
+    def clearBoardButtonClicked(self):
+        self.solver.clearBoard()
         
     def stopButtonClicked(self):
         self.timer.stop()
