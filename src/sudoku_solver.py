@@ -25,6 +25,8 @@ class SudokuSolver(QObject):
     #signal for when a board value gets changed
     value_changed: Signal = Signal(int, int, int) #row, column, value
 
+    finished: Signal = Signal()
+
     def __init__(
         self,
         board: list[list[int]],
@@ -122,15 +124,19 @@ class SudokuSolver(QObject):
                     return (y, x)
         return None
     
+    def _step(self):
+        if self._stop_requested or not self._backTrackStep():
+            self.finished.emit()
+
     def solve(self):
-        empty_cell = self.findEmpty()
-        self._backtrack_stack.append((empty_cell[0], empty_cell[1], 1))
+        self._stop_requested = False
 
-        while True:
-            if not self._backTrackStep():
-                break
+        start = self.findEmpty()
+        if start is None:
+            self.finished.emit()
+            return
 
-        self.moveToThread(self.solver_thread)
+        self._backtrack_stack.append((start[0], start[1], 1))
 
     def _backTrackStep(self):       
         if len(self._backtrack_stack) == 0:
