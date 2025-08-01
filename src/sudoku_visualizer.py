@@ -2,7 +2,7 @@ from typing import ClassVar
 import sys
 import time
 
-from PySide6.QtWidgets import QMainWindow, QApplication, QWidget, QTableWidget, QPushButton, QLineEdit, QComboBox, QHBoxLayout, QVBoxLayout, QGroupBox, QLabel, QHeaderView, QTableWidgetItem, QStyledItemDelegate
+from PySide6.QtWidgets import QMainWindow, QApplication, QWidget, QTableWidget, QPushButton, QLineEdit, QComboBox, QHBoxLayout, QVBoxLayout, QGroupBox, QLabel, QHeaderView, QTableWidgetItem, QStyledItemDelegate, QButtonGroup
 from PySide6.QtCore import Qt, QRect, QTimer
 from PySide6.QtGui import QPen, QColor
 
@@ -247,6 +247,7 @@ class SudokuGUIVisualizer(QMainWindow, SudokuObserver):
 
         #Stop button
         self.stop_button: QPushButton = QPushButton("Stop Solving")
+        self.stop_button.setDisabled(True)
         self.sidebar_widgets.append(self.stop_button)
 
 
@@ -272,4 +273,14 @@ class SudokuGUIVisualizer(QMainWindow, SudokuObserver):
             self.vertical_layout.addStretch(8)
         
 
-    
+    def toggleEverySidebarWidgetExcept(self, toggle: str, exceptions: list[QWidget]):
+        if toggle is not "enable" and toggle is not "disable":
+            print("SudokuGuiVisualizer.toggleEverySidebarWidgetExcept: toggle must either be the string 'enable' or 'disable;")
+            return
+        
+        value: bool = True if toggle is "enable" else False
+        for widget in self.sidebar_widgets:
+            if widget not in exceptions:
+                widget.setDisabled(not value)
+            else:
+                widget.setDisabled(value)
