@@ -8,16 +8,17 @@ from sudoku_visualizer import SudokuGUIVisualizer
 
 class SudokuController():
 
-    def __init__(self, board: list[list[int]]):
+    def __init__(self, board: list[list[int]], time_delay: float = 0):
         self.solver = SudokuSolver(board)
+        self.time_delay: float = time_delay
         
         self.timer: QTimer = QTimer()
         self.timer.timeout.connect(self.solver._step)
 
     #this functions will be connected to the solve button
     def startSolving(self):
-        self.timer.start(int(0 * 1000))
         self.solver.solve()
+        self.timer.start(int(self.time_delay * 1000))
     
     def setupUI(self):
         self.app: QApplication = QApplication(sys.argv)
@@ -29,7 +30,6 @@ class SudokuController():
         self.view.show()
         sys.exit(self.app.exec())
 
-
     #connect the GUI to the various backend functions
     def _setupConnections(self):
         self.solver.value_changed.connect(self.valueChanged)
@@ -37,6 +37,8 @@ class SudokuController():
         self.view.solve_button.clicked.connect(self.startSolving)
         self.view.load_example.clicked.connect(self.loadBoard)
         self.view.quit_button.clicked.connect(self.quitApplication)
+        self.view.solve_mode_combo_box.currentTextChanged.connect(self.solveModeChanged)
+        self.view.time_delay.returnPressed.connect(self.timeDelayChanged)
 
         self.solver.finished.connect(self.stopButtonClicked)
         self.view.stop_button.clicked.connect(self.stopButtonClicked)
@@ -48,6 +50,19 @@ class SudokuController():
         
     def stopButtonClicked(self):
         self.timer.stop()
+
+    def timeDelayChanged(self):
+        try:
+            self.time_delay = float(self.view.time_delay.text())
+        except:
+            print("Must be a number")
+
+    def solveModeChanged(self, index: int):
+        current_text: str = self.view.solve_mode_combo_box.currentText()
+        if current_text == "Fast":
+            self.view.time_delay.setDisabled(True)
+        else:
+            self.view.time_delay.setDisabled(False)
 
     def valueChanged(self, row: int, column: int, value: int):
         if value == 0:
