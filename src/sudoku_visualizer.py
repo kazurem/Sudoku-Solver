@@ -212,6 +212,7 @@ class SudokuGUIVisualizer(QMainWindow, SudokuObserver):
         self.board.verticalHeader().setSectionResizeMode(QHeaderView.Stretch)
         self.board.setItemDelegate(SudokuDelegate(self.board))
         self.board.setSelectionMode(QTableWidget.NoSelection)
+        self.board.setCurrentCell(-1, -1)
 
         for y in range(9):
             for x in range(9):
@@ -274,11 +275,11 @@ class SudokuGUIVisualizer(QMainWindow, SudokuObserver):
         
 
     def toggleEverySidebarWidgetExcept(self, toggle: str, exceptions: list[QWidget]):
-        if toggle is not "enable" and toggle is not "disable":
+        if toggle != "enable" and toggle != "disable":
             print("SudokuGuiVisualizer.toggleEverySidebarWidgetExcept: toggle must either be the string 'enable' or 'disable;")
             return
         
-        value: bool = True if toggle is "enable" else False
+        value: bool = True if toggle == "enable" else False
         for widget in self.sidebar_widgets:
             if widget not in exceptions:
                 widget.setDisabled(not value)
@@ -293,3 +294,11 @@ class SudokuGUIVisualizer(QMainWindow, SudokuObserver):
                     item.setFlags(item.flags() | Qt.ItemIsEditable)
                 elif toggle == "disable":
                     item.setFlags(item.flags() & ~Qt.ItemIsEditable)
+    
+    def setTableFocus(self, value: bool):
+        if value is False:
+            self.board.clearSelection()
+            self.board.setCurrentCell(-1, -1)
+            self.board.clearFocus() 
+        else:
+            self.board.setFocus() 

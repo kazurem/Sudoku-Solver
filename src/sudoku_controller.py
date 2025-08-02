@@ -20,6 +20,7 @@ class SudokuController(QObject):
 
     #this functions will be connected to the solve button
     def startSolving(self):
+        self.view.board.setCurrentCell(-1, -1)
         self.session_started.emit()
         self.solver.solve()
         self.timer.start(int(self.time_delay * 1000))
@@ -44,6 +45,7 @@ class SudokuController(QObject):
         self.view.solve_mode_combo_box.currentTextChanged.connect(self.solveModeChanged)
         self.view.time_delay.returnPressed.connect(self.timeDelayChanged)
         self.view.clear_button.clicked.connect(self.clearBoardButtonClicked)
+        self.view.board.cellChanged.connect(self.cellEdited)
 
         self.solver.finished.connect(self.stopButtonClicked)
         self.view.stop_button.clicked.connect(self.stopButtonClicked)
@@ -53,7 +55,23 @@ class SudokuController(QObject):
         self.solver.finished.connect(lambda: self.view.toggleEverySidebarWidgetExcept("enable", exceptions=[self.view.stop_button]))
 
         self.session_started.connect(lambda: self.view.toggleEditCells("disable"))
+        self.session_started.connect(lambda: self.view.setTableFocus(False))
         self.session_ended.connect(lambda: self.view.toggleEditCells("enable"))
+        self.session_ended.connect(lambda: self.view.setTableFocus(True))
+
+    def cellEdited(self, row: int, column: int):
+        if self.view.board.item(row, column) is self.view.board.currentItem():
+            possible: bool = True
+            value: str = self.view.board.item(row, column).text()
+
+            if value.isdigit():
+                possible = self.solver.setCellValue(row, column, int(value))
+            else:
+                self.solver.setCellValue(row, column, 0)
+                self.view.board.item(row, column).setText("")
+
+            if not possible:
+                self.view.board.item(row, column).setText("")
 
     def clearBoardButtonClicked(self):
         self.solver.clearBoard()

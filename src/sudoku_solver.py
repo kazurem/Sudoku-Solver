@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from PySide6.QtCore import Signal, QObject, QThread
 
 try:
-	from src.sudoku_visualizer import SudokuObserver
+    from src.sudoku_visualizer import SudokuObserver
 except ModuleNotFoundError:
     from sudoku_visualizer import SudokuObserver
 
@@ -59,6 +59,15 @@ class SudokuSolver(QObject):
         self.show_process: bool = show_process
 
         self._backtrack_stack = []
+
+    def setCellValue(self, row: int, column: int, value: int):
+        if self.isMoveValid((row, column), value):
+            self.state.board[row][column] = value
+        elif value == 0:
+            self.state.board[row][column] = 0
+        else:
+            return False
+        return True
 
     def isValidBoard(self) -> None:
 
@@ -129,6 +138,7 @@ class SudokuSolver(QObject):
     def solve(self):
         start = self.findEmpty()
         if start is None:
+            print(None)
             self.finished.emit()
             return
 
