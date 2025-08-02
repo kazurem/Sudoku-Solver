@@ -1,14 +1,17 @@
 import sys
 
 from PySide6.QtWidgets import QApplication
-from PySide6.QtCore import QTimer
+from PySide6.QtCore import QTimer, QObject, Signal
 
 from sudoku_solver import SudokuSolver
 from sudoku_visualizer import SudokuGUIVisualizer
 
-class SudokuController():
+class SudokuController(QObject):
+    session_started: Signal = Signal()
+    session_ended: Signal = Signal()
 
     def __init__(self, board: list[list[int]], time_delay: float = 0):
+        super().__init__()
         self.solver = SudokuSolver(board)
         self.time_delay: float = time_delay
         
@@ -17,6 +20,7 @@ class SudokuController():
 
     #this functions will be connected to the solve button
     def startSolving(self):
+        self.session_started.emit()
         self.solver.solve()
         self.timer.start(int(self.time_delay * 1000))
     
@@ -46,10 +50,14 @@ class SudokuController():
 
         self.view.solve_button.clicked.connect(lambda: self.view.toggleEverySidebarWidgetExcept("disable", exceptions=[self.view.stop_button, self.view.quit_button]))
         self.view.stop_button.clicked.connect(lambda: self.view.toggleEverySidebarWidgetExcept("enable", exceptions=[self.view.stop_button]))
-        self.solver.finished.connect(lambda: self.view.toggleEverySidebarWidgetExcept("enable", exceptions=[self.view.solve_button]))
+        self.solver.finished.connect(lambda: self.view.toggleEverySidebarWidgetExcept("enable", exceptions=[self.view.stop_button]))
+
+        self.session_started.connect(lambda: self.view.toggleEditCells("disable"))
+        self.session_ended.connect(lambda: self.view.toggleEditCells("enable"))
 
     def clearBoardButtonClicked(self):
         self.solver.clearBoard()
+        self.session_ended.emit()
         
     def stopButtonClicked(self):
         self.timer.stop()

@@ -2,7 +2,7 @@ from typing import ClassVar
 import sys
 import time
 
-from PySide6.QtWidgets import QMainWindow, QApplication, QWidget, QTableWidget, QPushButton, QLineEdit, QComboBox, QHBoxLayout, QVBoxLayout, QGroupBox, QLabel, QHeaderView, QTableWidgetItem, QStyledItemDelegate, QButtonGroup
+from PySide6.QtWidgets import QMainWindow, QWidget, QTableWidget, QPushButton, QLineEdit, QComboBox, QHBoxLayout, QVBoxLayout, QGroupBox, QLabel, QHeaderView, QTableWidgetItem, QStyledItemDelegate, QButtonGroup
 from PySide6.QtCore import Qt, QRect, QTimer
 from PySide6.QtGui import QPen, QColor
 
@@ -284,3 +284,12 @@ class SudokuGUIVisualizer(QMainWindow, SudokuObserver):
                 widget.setDisabled(not value)
             else:
                 widget.setDisabled(value)
+    
+    def toggleEditCells(self, toggle: str):
+        for row in range(self.board.rowCount()):
+            for column in range(self.board.columnCount()):
+                item: QTableWidgetItem = self.board.item(row, column)
+                if toggle == "enable":
+                    item.setFlags(item.flags() | Qt.ItemIsEditable)
+                elif toggle == "disable":
+                    item.setFlags(item.flags() & ~Qt.ItemIsEditable)

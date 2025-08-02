@@ -60,9 +60,6 @@ class SudokuSolver(QObject):
 
         self._backtrack_stack = []
 
-    def setSolverThread(self, thread: QThread):
-        self.solver_thread = thread
-
     def isValidBoard(self) -> None:
 
         # check if box size is valid (Box size is equal to board size)
@@ -126,12 +123,10 @@ class SudokuSolver(QObject):
         return None
     
     def _step(self):
-        if self._stop_requested or not self._backTrackStep():
+        if not self._backTrackStep():
             self.finished.emit()
 
     def solve(self):
-        self._stop_requested = False
-
         start = self.findEmpty()
         if start is None:
             self.finished.emit()
