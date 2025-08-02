@@ -2,7 +2,7 @@ from typing import ClassVar
 import sys
 import time
 
-from PySide6.QtWidgets import QMainWindow, QApplication, QWidget, QTableWidget, QPushButton, QLineEdit, QComboBox, QHBoxLayout, QVBoxLayout, QGroupBox, QLabel, QHeaderView, QTableWidgetItem, QStyledItemDelegate
+from PySide6.QtWidgets import QMainWindow, QWidget, QTableWidget, QPushButton, QLineEdit, QComboBox, QHBoxLayout, QVBoxLayout, QGroupBox, QLabel, QHeaderView, QTableWidgetItem, QStyledItemDelegate, QButtonGroup
 from PySide6.QtCore import Qt, QRect, QTimer
 from PySide6.QtGui import QPen, QColor
 
@@ -107,12 +107,12 @@ class SudokuTerminalVisualizer(SudokuObserver):
 
 
 class SudokuGUIVisualizer(QMainWindow, SudokuObserver):
-    def __init__(self, window_geometry: QRect = QRect(500, 200, 1200, 800)):
+    def __init__(self, window_geometry: QRect = QRect(400, 150, 800, 500)):
         super().__init__()
         self.window_geometry: QRect = window_geometry
         self.initUI()
 
-    def __new__(cls, window_geometry: QRect= QRect(500, 200, 1200, 800)):
+    def __new__(cls, window_geometry: QRect= QRect(400, 150, 800, 500)):
         if not hasattr(cls, "instance"):
             cls.instance: SudokuGUIVisualizer = super(SudokuGUIVisualizer, cls).__new__(cls, window_geometry)
         return cls.instance
@@ -212,6 +212,7 @@ class SudokuGUIVisualizer(QMainWindow, SudokuObserver):
         self.board.verticalHeader().setSectionResizeMode(QHeaderView.Stretch)
         self.board.setItemDelegate(SudokuDelegate(self.board))
         self.board.setSelectionMode(QTableWidget.NoSelection)
+        self.board.setCurrentCell(-1, -1)
 
         for y in range(9):
             for x in range(9):
@@ -247,6 +248,7 @@ class SudokuGUIVisualizer(QMainWindow, SudokuObserver):
 
         #Stop button
         self.stop_button: QPushButton = QPushButton("Stop Solving")
+        self.stop_button.setDisabled(True)
         self.sidebar_widgets.append(self.stop_button)
 
 
@@ -272,4 +274,31 @@ class SudokuGUIVisualizer(QMainWindow, SudokuObserver):
             self.vertical_layout.addStretch(8)
         
 
+    def toggleEverySidebarWidgetExcept(self, toggle: str, exceptions: list[QWidget]):
+        if toggle != "enable" and toggle != "disable":
+            print("SudokuGuiVisualizer.toggleEverySidebarWidgetExcept: toggle must either be the string 'enable' or 'disable;")
+            return
+        
+        value: bool = True if toggle == "enable" else False
+        for widget in self.sidebar_widgets:
+            if widget not in exceptions:
+                widget.setDisabled(not value)
+            else:
+                widget.setDisabled(value)
     
+    def toggleEditCells(self, toggle: str):
+        for row in range(self.board.rowCount()):
+            for column in range(self.board.columnCount()):
+                item: QTableWidgetItem = self.board.item(row, column)
+                if toggle == "enable":
+                    item.setFlags(item.flags() | Qt.ItemIsEditable)
+                elif toggle == "disable":
+                    item.setFlags(item.flags() & ~Qt.ItemIsEditable)
+    
+    def setTableFocus(self, value: bool):
+        if value is False:
+            self.board.clearSelection()
+            self.board.setCurrentCell(-1, -1)
+            self.board.clearFocus() 
+        else:
+            self.board.setFocus() 
