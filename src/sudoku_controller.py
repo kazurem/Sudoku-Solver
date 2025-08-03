@@ -79,6 +79,8 @@ class SudokuController(QObject):
         
     def stopButtonClicked(self):
         self.timer.stop()
+        if self.view.solve_mode_combo_box.currentText() == "Fast":
+            self.loadBoard()
 
     def timeDelayChanged(self):
         try:
@@ -94,10 +96,11 @@ class SudokuController(QObject):
             self.view.time_delay.setDisabled(False)
 
     def valueChanged(self, row: int, column: int, value: int):
-        if value == 0:
-            self.view.board.item(row, column).setText("")
-        else:
-            self.view.board.item(row, column).setText(str(value))
+        if self.view.solve_mode_combo_box.currentText() != "Fast":
+            if value == 0:
+                self.view.board.item(row, column).setText("")
+            else:
+                self.view.board.item(row, column).setText(str(value))
 
     def loadBoard(self):
         board_size: int = self.solver.state.board_size
