@@ -1,7 +1,7 @@
 import sys
 
 from PySide6.QtWidgets import QApplication
-from PySide6.QtCore import QTimer, QObject, Signal
+from PySide6.QtCore import QTimer, QObject, Signal, QElapsedTimer
 
 from sudoku_solver import SudokuSolver
 from sudoku_visualizer import SudokuGUIVisualizer
@@ -17,9 +17,14 @@ class SudokuController(QObject):
         
         self.timer: QTimer = QTimer()
         self.timer.timeout.connect(self.solver._step)
+        
+        self.elapsed_timer: QElapsedTimer = QElapsedTimer()
+        self.elapsed_time: float = 0
+        
 
     #this functions will be connected to the solve button
     def startSolving(self):
+        self.elapsed_timer.start()
         self.view.board.setCurrentCell(-1, -1)
         self.session_started.emit()
         self.solver.solve()
@@ -43,7 +48,7 @@ class SudokuController(QObject):
         self.view.load_example.clicked.connect(self.loadBoard)
         self.view.quit_button.clicked.connect(self.quitApplication)
         self.view.solve_mode_combo_box.currentTextChanged.connect(self.solveModeChanged)
-        self.view.time_delay.returnPressed.connect(self.timeDelayChanged)
+        self.view.time_delay_lineedit.returnPressed.connect(self.timeDelayChanged)
         self.view.clear_button.clicked.connect(self.clearBoardButtonClicked)
         self.view.board.cellChanged.connect(self.cellEdited)
 
@@ -76,24 +81,27 @@ class SudokuController(QObject):
     def clearBoardButtonClicked(self):
         self.solver.clearBoard()
         self.session_ended.emit()
+        self.elapsed_time = 0
+        self.view.time_label.setText("Timer: 0")
         
     def stopButtonClicked(self):
+        self.elapsed_time += self.elapsed_timer.elapsed()
         self.timer.stop()
         if self.view.solve_mode_combo_box.currentText() == "Fast":
             self.loadBoard()
 
     def timeDelayChanged(self):
         try:
-            self.time_delay = float(self.view.time_delay.text())
+            self.time_delay = float(self.view.time_delay_lineedit.text())
         except:
             print("Must be a number")
 
     def solveModeChanged(self, index: int):
         current_text: str = self.view.solve_mode_combo_box.currentText()
         if current_text == "Fast":
-            self.view.time_delay.setDisabled(True)
+            self.view.time_delay_lineedit.setDisabled(True)
         else:
-            self.view.time_delay.setDisabled(False)
+            self.view.time_delay_lineedit.setDisabled(False)
 
     def valueChanged(self, row: int, column: int, value: int):
         if self.view.solve_mode_combo_box.currentText() != "Fast":
@@ -101,6 +109,7 @@ class SudokuController(QObject):
                 self.view.board.item(row, column).setText("")
             else:
                 self.view.board.item(row, column).setText(str(value))
+        self.view.time_label.setText("Timer: " + str((self.elapsed_timer.elapsed() + self.elapsed_time)/1000))
 
     def loadBoard(self):
         board_size: int = self.solver.state.board_size

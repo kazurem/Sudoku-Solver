@@ -235,12 +235,12 @@ class SudokuGUIVisualizer(QMainWindow, SudokuObserver):
         self.sidebar_widgets.append(self.solve_mode_combo_box)
 
         #Time Delay line edit
-        self.time_delay: QLineEdit = QLineEdit()
-        self.time_delay.setText("0")
-        self.sidebar_widgets.append(self.time_delay)
+        self.time_delay_lineedit: QLineEdit = QLineEdit()
+        self.time_delay_lineedit.setText("0")
+        self.sidebar_widgets.append(self.time_delay_lineedit)
 
         if self.solve_mode_combo_box.currentText() == "Fast":
-            self.time_delay.setDisabled(True)
+            self.time_delay_lineedit.setDisabled(True)
 
         #Solve button
         self.solve_button: QPushButton = QPushButton("Solve Puzzle")
